@@ -24,9 +24,9 @@ const createTransporter =  (emailcontact, token2verifyemail) => {
     // "https://developers.google.com/oauthplayground"
   );
 
-    // Easyclicksclient.setCredentials({
-    //   refresh_token: process.env.REFRESH_TOKEN
-    // });
+    Easyclicksclient.setCredentials({
+      refresh_token: process.env.REFRESH_TOKEN
+    });
 
 
 
@@ -58,53 +58,55 @@ const createTransporter =  (emailcontact, token2verifyemail) => {
     state: state
   });
 
+  console.log(authorizationUrl)
 
 
-  Easyclicksclient.on('tokens', (tokens) => {
-    console.log("HERE ARE ALL THE TOKENS  " + tokens);
-    if (tokens.refresh_token) {
-        // store the refresh_token in your secure persistent database
-        console.log(tokens.refresh_token);
+  // Easyclicksclient.on('tokens', (tokens) => {
+  //   console.log("HERE ARE ALL THE TOKENS  " + tokens);
+  //   if (tokens.refresh_token) {
+  //       // store the refresh_token in your secure persistent database
+  //       console.log(tokens.refresh_token);
         
-        console.log("here is the refresh_tokens  " + tokens.refresh_token)
-    }
-        console.log("here is the access_tokens  " + tokens.access_token)
-        console.log(tokens.access_token);
-
-        
-        // console.log(emailTransporter())
-        
-        return tokens;            
-});
-
-
-  async function fetchTokens(){
-    try{
-      // Assuming 'getAccessTokens' is the correct method
-      Easyclicksclient.getAccessTokens()
-        .then(tokens => {
-          console.log('Access tokens:', tokens);
-          return tokens;
-          // Proceed with further actions
-        })
-        .catch(err => {
-          console.error('Error fetching tokens:', err);
-          // Handle error appropriately
-      });
-    } 
-    catch(err){
-      console.log("error from catch fetch tokens error " + err.message)
-    }   
-  }
+  //       console.log("here is the refresh_tokens  " + tokens.refresh_token)
+  //   }
+  //   console.log("here is the access_tokens  " + tokens.access_token)
+  //   console.log(tokens.access_token);
+    
+    
+  //   // console.log(emailTransporter())
+    
+  //   return tokens;            
+  // });
   
-  const access_token=fetchTokens();
+  
+  
+
+  // async function fetchTokens(){
+  //   try{
+  //     // Assuming 'getAccessTokens' is the correct method
+  //     Easyclicksclient.getAccessTokens()
+  //       .then(tokens => {
+  //         console.log('Access tokens:', tokens);
+  //         return tokens;
+  //         // Proceed with further actions
+  //       })
+  //       .catch(err => {
+  //         console.error('Error fetching tokens:', err);
+  //         // Handle error appropriately
+  //     });
+  //   } 
+  //   catch(err){
+  //     console.log("error from catch fetch tokens error " + err.message)
+  //   }   
+  // }
+  
+  // const access_token=fetchTokens();
 
 
   // global.storedfetchedtokens=tokens;
 
   // console.log(callbackTokens);
   
-  console.log(authorizationUrl)
 
 
   const transporter = nodemailer.createTransport({
@@ -112,7 +114,6 @@ const createTransporter =  (emailcontact, token2verifyemail) => {
     auth: {
       type: "OAuth2",
       user: process.env.OWNER,
-      // access_token,
       accessToken:process.env.ACCESS_TOKEN,
       clientId: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_KEY,
@@ -149,7 +150,7 @@ const createTransporter =  (emailcontact, token2verifyemail) => {
           `,
   
           to: emailcontact,
-          from: process.env.GMAIL
+          from: process.env.OWNER
         })
         .catch((err)=>{
           console.log("Error sending the stupid Mail  "+ err.message + "error thrown below");

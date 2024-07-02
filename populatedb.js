@@ -514,6 +514,7 @@ function populatedb (){
     
     con.connect(function(err) {
       if (err) throw err;
+    //   console.log(err.message)
      
       async function createSqlTables(){
 
@@ -629,7 +630,7 @@ function populatedb (){
             var createaccesstokenstable=`CREATE TABLE IF NOT EXISTS accesstokens(
                 accesstoken_id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id VARCHAR(255),
-                accesstoken VARCHAR(255),
+                accesstoken VARCHAR(1024),
                 FOREIGN KEY(user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE
             )`;
            
@@ -637,7 +638,7 @@ function populatedb (){
             var createrefreshtokenstable=`CREATE TABLE IF NOT EXISTS refreshtokens(
                 refreshtoken_id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id VARCHAR(255),
-                refreshtoken VARCHAR(255),
+                refreshtoken VARCHAR(1024),
                 FOREIGN KEY(user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE
             )`;
 

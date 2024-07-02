@@ -88,7 +88,7 @@ app.use(corsOptions);
   //set the roots to be used for the app
   const oAuth2=require("../oauthcallback");
   const refreshTokens=require("../routes/tokensRouter")
-  // const loginRouter= require ("../routes/loginRouter")
+  const loginRouter= require ("../routes/loginRouter")
   // const indexRouter= require("../routes/indexRouter")
    const signupRouter= require("../routes/signupRouter")
   const verifyemailRouter=require("../routes/verifyemailRouter")
@@ -153,7 +153,7 @@ app.use(corsOptions);
   // app.use(auth);
   //use url paths as middlewares
   // app.use("/o/auth/passwordreset",  passwordresetRouter)
-  // app.use("/o/auth/login",   loginRouter)
+  app.use("/o/auth/login",   loginRouter)
   app.use("/o/auth/verify", verifyemailRouter)
   app.use("/o/auth/signup",  signupRouter)
   app.use("/o/auth/refreshtokens", refreshTokens);

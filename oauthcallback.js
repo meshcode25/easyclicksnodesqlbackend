@@ -59,31 +59,28 @@ router.get("/", async (req,res)=>{
         Easyclicksclient.on('tokens', (tokens) => {
             // console.log("HERE ARE ALL THE TOKENS  " + tokens);
           
-
-
             if (tokens.refresh_token) {
                 // store the refresh_token in your secure persistent database
                 // console.log(tokens.refresh_token);
                 
-                console.log("here is the refresh_tokens  " + tokens.refresh_token)
+                console.log("here is the refresh_tokens  ")
             }
-            else{
-
-            
-                console.log("here is the access_tokens  " + tokens.access_token)
+            else{            
+                console.log("here is the access_tokens  " )
                 // console.log(tokens.access_token);
             }
-                
-            global.storedfetchedtokens=tokens;
-            global.storedacesstokens=tokens.access_token;
-            global.storedfetchedrefreshtokens=tokens.refresh_token;
+
+
 
             console.log("here are the tokens   " + {tokens})
+            console.log("her is teh access tokens " + tokens.access_token)
+            console.log("her is teh refresh tokens " + tokens.refresh_token)
 
-            Easyclicksclient.setCredentials(tokens);
-            console.log(global.storedfetchedrefreshtokens);
-            console.log(global.storedacesstokens)    
 
+
+
+            // Easyclicksclient.setCredentials(tokens);
+           
 
 
             return tokens;            
@@ -92,8 +89,8 @@ router.get("/", async (req,res)=>{
 
 
 
-        // Easyclicksclient.setCredentials(tokens);
-        // console.log("here is the long awaited code " + q.code);
+        Easyclicksclient.setCredentials(tokens);
+        console.log("here is the long awaited authorization _ code " + q.code);
     }
 
 })

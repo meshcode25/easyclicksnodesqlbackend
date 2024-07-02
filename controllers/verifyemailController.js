@@ -21,16 +21,6 @@ exports.verifyEmail=(req, res,next)=>{
 
 
 
-    const refreshTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000 + (6*30*24*60*60)),user_id:req.params.verificationcode }, process.env.REFRESH_TOKEN_SECRET)   
-    const accessTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000)+ (24*60*60), user_id:req.params.verificationcode}, process.env.ACCESS_TOKEN_SECRET)  
-    
-    const checkaccesstokens=`SELECT * FROM accesstokens WHERE user_id="${req.params.verificationcode}";`
-    const checkrefreshtokens=`SELECT * FROM refreshtokens WHERE user_id="${req.params.verificationcode}";`
-    
-    const accessToken={user_id:req.params.verificationcode, accesstoken:accessTokenSign}
-
-    const refreshToken={user_id:req.params.verificationcode, accesstoken:refreshTokenSign}
-
     var userData={status:"verified"}
     var checkuser =`SELECT * FROM users WHERE user_id="${req.params.verificationcode}";`;
     var updateuser=`UPDATE users SET? WHERE user_id="${req.params.verificationcode}"`
@@ -41,8 +31,26 @@ exports.verifyEmail=(req, res,next)=>{
             console.log(err);
         }
         else{
-            var userstatus=results[0];
-            console.log(userstatus.status);
+            var userResults=results[0];
+            var user=userResults
+
+
+            const refreshTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000 + (6*30*24*60*60)),user_id:req.params.verificationcode, user:user }, process.env.REFRESH_TOKEN_SECRET)   
+            const accessTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000)+ (24*60*60), user_id:req.params.verificationcode, user:user}, process.env.ACCESS_TOKEN_SECRET)  
+
+
+
+            const checkaccesstokens=`SELECT * FROM accesstokens WHERE user_id="${req.params.verificationcode}";`
+            const checkrefreshtokens=`SELECT * FROM refreshtokens WHERE user_id="${req.params.verificationcode}";`
+            
+            const accessToken={user_id:req.params.verificationcode, accesstoken:accessTokenSign}
+        
+            const refreshToken={user_id:req.params.verificationcode, refreshtoken:refreshTokenSign}
+        
+
+            
+
+
             if(results.length >0){
                 dbconn.query(updateuser, userData ,function(err, results){
                     if(err){
@@ -92,7 +100,7 @@ exports.verifyEmail=(req, res,next)=>{
             }
             else{
                 console.log("User already exists Please login")
-                res.status(404).send({message:"User alreadyexists, please login! "})
+                res.status(200).send({message:"User alreadyexists, please login! "})
             }
         }
     })
