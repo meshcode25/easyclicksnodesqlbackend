@@ -2,16 +2,18 @@ const express= require ("express")
 const router= express.Router();
 
 const propertyController= require("../controllers/propertycontroller")
-const unitController= require("../controllers/unitcontroller")
-const landLordController= require("../controllers/landlordcontroller")
-const careTakerController= require("../controllers/caretakercontroller")
+// const unitController= require("../controllers/unitcontroller")
+// const landLordController= require("../controllers/landlordcontroller")
+// const careTakerController= require("../controllers/caretakercontroller")
+
+
+
+
 
 //Post request for creating a new apartment
+router.post("/list-property/landlordstep", propertyController.createLandlord);
 
-router.post("/list-property/step1", function (req,res,next){
-    console.log(req.body);
-    res.status(200).send({Listpropertymessage:req.body});
-})
+router.post("/list-property/createproperty", propertyController.createProperty);
 
 
 // , propertyController.create_apartement_post)

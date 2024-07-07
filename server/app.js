@@ -93,7 +93,7 @@ app.use(corsOptions);
    const signupRouter= require("../routes/signupRouter")
   const verifyemailRouter=require("../routes/verifyemailRouter")
   // const passwordresetRouter= require("../routes/passwordresetRouter")
-  // const propertyMangerRouter= require("../routes/propertymanagerRouter")
+  const propertyMangerRouter= require("../routes/propertymanagerRouter")
 
 
 
@@ -160,7 +160,7 @@ app.use(corsOptions);
   //app.use("/", indexRouter)
   app.use("/oauthcallback", oAuth2);
   
-  // app.use("/properties", propertyMangerRouter)
+  app.use("/properties", propertyMangerRouter)
   
   /*app.use("/landlord", landLordRouter)
   
