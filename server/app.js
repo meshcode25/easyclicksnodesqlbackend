@@ -35,8 +35,9 @@ require("@babel/register")({
   
 
   const app= express()
+  app.use(express.json())
 
-
+  
 
 
 corsOptions=cors({
@@ -76,15 +77,14 @@ app.use(corsOptions);
   
   
   
-  require("jsonwebtoken")
+  // require("jsonwebtoken")
   
   const auth=require("../middlewares/authentification")
   
   const cookieParser = require("cookie-parser")
   
   // configure server
-  
-  
+
   //set the roots to be used for the app
   const oAuth2=require("../oauthcallback");
   const refreshTokens=require("../routes/tokensRouter")
@@ -93,7 +93,7 @@ app.use(corsOptions);
    const signupRouter= require("../routes/signupRouter")
   const verifyemailRouter=require("../routes/verifyemailRouter")
   // const passwordresetRouter= require("../routes/passwordresetRouter")
-  const propertyMangerRouter= require("../routes/propertymanagerRouter")
+  const propertyManagerRouter= require("../routes/propertymanagerRouter")
 
 
 
@@ -120,7 +120,8 @@ app.use(corsOptions);
   
   //Middlewares
   //body parser and urlencode
-  app.use(express.json())
+
+
   app.use(express.urlencoded({extended:false}))
   
   
@@ -150,17 +151,18 @@ app.use(corsOptions);
 
 
   */
-  // app.use(auth);
-  //use url paths as middlewares
-  // app.use("/o/auth/passwordreset",  passwordresetRouter)
-  app.use("/o/auth/login",   loginRouter)
-  app.use("/o/auth/verify", verifyemailRouter)
-  app.use("/o/auth/signup",  signupRouter)
-  app.use("/o/auth/refreshtokens", refreshTokens);
-  //app.use("/", indexRouter)
-  app.use("/oauthcallback", oAuth2);
-  
-  app.use("/properties", propertyMangerRouter)
+ //use url paths as middlewares
+ //  app.use("/", indexRouter)
+ // app.use("/o/auth/passwordreset",  passwordresetRouter)
+ app.use("/o/auth/login",   loginRouter)
+ app.use("/o/auth/verify", verifyemailRouter)
+ app.use("/o/auth/signup",  signupRouter)
+ app.use("/o/auth/refreshtokens", refreshTokens);
+ app.use("/oauthcallback", oAuth2);
+ 
+ app.use(auth);
+ 
+  app.use("/properties", propertyManagerRouter)
   
   /*app.use("/landlord", landLordRouter)
   

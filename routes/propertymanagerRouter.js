@@ -11,9 +11,14 @@ const propertyController= require("../controllers/propertycontroller")
 
 
 //Post request for creating a new apartment
-router.post("/list-property/landlordstep", propertyController.createLandlord);
+// router.post()
+
+router.post("/list-property/landlordstep/:propertyid", propertyController.createLandlord);
 
 router.post("/list-property/createproperty", propertyController.createProperty);
+
+router.post("/list-property/caretakerstep/:propertyid", propertyController.createCaretaker);
+
 
 
 // , propertyController.create_apartement_post)

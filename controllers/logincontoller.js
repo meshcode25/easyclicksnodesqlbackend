@@ -1,19 +1,15 @@
-// const User=require("../models/userModel")
-// const role=require("../models/rolesModel")
+// env.config()
 const jwt= require("jsonwebtoken")
-
-// const authconfig= require("../authConfig")
-const bcrypt = require("bcryptjs")
-// const secret=authconfig.secret
-
-
 const mysql=require("mysql")
 const dbConnection=require("../databaseSchemas/connectDatabase")
 var uniqueId = require("../databaseSchemas/uniqueId")
+const { v4: uuidv4 } = require('uuid');
 
+const bcrypt = require("bcryptjs")
 
-
-// }
+// const e = require("express")
+// const secret=authconfig.secret
+// const authconfig= require("../authConfig")
 
 exports.login_form_post=function(req,res,next){
 
@@ -38,7 +34,7 @@ exports.login_form_post=function(req,res,next){
                 const user=results[0];
 
 
-                console.log("user index 0  ")
+                console.log("user index 0 listed below  ")
                 console.log(user);
                 console.log(user.email)
                 console.log(user.password);
@@ -90,57 +86,67 @@ exports.login_form_post=function(req,res,next){
                             const verified=isVerifiedEmail()
                     
                         
-                            if(!verified){
-                                return res.status(200).send({message: "Unverified Email, Please Check you Email to Verify your Account", color: "red", type:"unverified"})
+                            // if(!verified){
+                            //     return res.status(200).send({message: "Unverified Email, Please Check you Email to Verify your Account", color: "red", type:"unverified"})
                             
-                            }else{    
+                            // }else{    
                             
                                 const refreshTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000 + (6*30*24*60*60)),user_id:user.user_id, user:user }, process.env.REFRESH_TOKEN_SECRET)   
-                                const accessTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000)+ (24*60*60), user_id:user.user_id, user:user}, process.env.ACCESS_TOKEN_SECRET)  
+                                const accessTokenSign=jwt.sign({exp:Math.floor(Date.now()/1000+ (1*60)), user_id:user.user_id, user:user}, process.env.ACCESS_TOKEN_SECRET)  
+
+                                console.log(process.env.REFRESH_TOKEN_SECRET);
+
 
                                 const checkaccesstokens=`SELECT * FROM accesstokens WHERE user_id="${user.user_id}";`
                                 const checkrefreshtokens=`SELECT * FROM refreshtokens WHERE user_id="${user.user_id}";`
 
+                                const accesstokenid=uuidv4();
+                                const refreshtokenid=uuidv4();
+   
+                                console.log("Herer is he refresh token ID " + accesstokenid);
+                                console.log("Herer is he refresh token ID  " + refreshtokenid)
                                 
-                                const accessToken={user_id:user.user_id, accesstoken:accessTokenSign}
-                                const refreshToken={user_id:user.user_id, refreshtoken:refreshTokenSign}
+                                const accessToken={ accesstoken:accessTokenSign};
+                                const refreshToken={refreshtoken:refreshTokenSign};
 
-
+                                // console.log(refreshTokenSign)
+                                // console.log(accessTokenSign)
 
                                 dbconn.query(checkaccesstokens, (err,results,fields)=>{
                                     if(err){
                                         console.log(err);
                                     }
                                     else{
-                                        if(results>0){
-                                            dbconn.query(`DELETE * FROM accesstokens WHERE user_id="${user.user_id}"`, (err,results,fields)=>{
+                                        if(results.length>0){
+                                            dbconn.query(`DELETE FROM accesstokens WHERE user_id="${user.user_id}"`, (err,results,fields)=>{
                                                 if(err){
                                                     console.log(err)
                                                 }
                                                 else{
                                                     console.log("deleted access tokens")
-                                                console.log(results);
+                                                    console.log(results);
+
+                                                    dbconn.query(`INSERT INTO accesstokens SET ? `, accessToken, (err,results,fields)=>{
+                                                        if(err){
+                                                            console.log(err);
+                                                        }
+                                                        else{
+                                                            console.log("new access token created inserted ")
+                                                            console.log(results)
+                                                        }
+                                                    })
                                                 }
                                             })
-                                        
-                                    
+            
                                         }
                                         else{
-                                            console.log(results);
-                                            dbconn.query(`INSERT INTO accesstokens SET ?`, accessToken, (err,results,fields)=>{
+
+                                            dbconn.query(`INSERT INTO accesstokens SET ? ;`, accessToken, (err,results,fields)=>{
                                                 if(err){
                                                     console.log(err);
                                                 }
                                                 else{
-                                                    console.log(results)
-                                                }
-                                            })
-                                            
-                                            dbconn.query(`INSERT INTO refreshtokens SET ?`, refreshToken, (err,results,fields)=>{
-                                                if(err){
-                                                    console.log(err);
-                                                }
-                                                else{
+                                                    console.log("new access token created inserted ")
                                                     console.log(results)
                                                 }
                                             })
@@ -153,14 +159,25 @@ exports.login_form_post=function(req,res,next){
                                         console.log(err);
                                     }
                                     else{
-                                        if(results>0){
-                                            dbconn.query(`DELETE * FROM refreshtokens WHERE user_id="${user.user_id}"`, (err,results,fields)=>{                                      
+                                        if(results.length>0){
+                                            dbconn.query(`DELETE FROM refreshtokens WHERE user_id="${user.user_id}"`, (err,results,fields)=>{                                      
                                                 if(err){
                                                     console.log(err)
                                                 }
                                                 else{
                                                     console.log("deleted refresh tokens")
                                                     console.log(results);
+
+                                                    dbconn.query(`INSERT INTO refreshtokens SET ?`, refreshToken, (err,results,fields)=>{
+                                                        if(err){
+                                                            console.log(err);
+                                                        }
+                                                        else{
+                                                            console.log("new refresh token created inserted into table refresh tokens")
+                                                            console.log(results)
+
+                                                        }
+                                                    })  
                                                 }
                                             })
 
@@ -168,12 +185,14 @@ exports.login_form_post=function(req,res,next){
                                         else{
                                             
                                             console.log(results)
-                                            dbconn.query(`INSERT INTO refreshtokens SET ?`, refreshToken, (err,results,fields)=>{
+                                            dbconn.query(`INSERT INTO refreshtokens SET ? ;`, refreshToken, (err,results,fields)=>{
                                                 if(err){
                                                     console.log(err);
                                                 }
                                                 else{
+                                                    console.log("new refresh token created inserted into table refresh tokens")
                                                     console.log(results)
+
                                                 }
                                             })                    
 
@@ -182,17 +201,18 @@ exports.login_form_post=function(req,res,next){
                                     }
                                 })
 
+
                                 return res.status(201).send({
                                     // email:user.email,
                                     // accesstoken:token, 
                                     type:"successlogin",
                                     message:"Login Success, wait as we redirect you to the next page",
-                                    refreshtoken:refreshToken,
-                                    accesstoken: accessToken, 
+                                    refreshtoken:refreshTokenSign,
+                                    accesstoken: accessTokenSign, 
                                     user:user,
                                     color:"green"
                                 })
-                            }   
+                               
                             
                         }
                         else{

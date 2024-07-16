@@ -526,7 +526,7 @@ function populatedb (){
                 email VARCHAR(255),
                 password VARCHAR(255), 
                 phonenumber INT(255), 
-                role VARCHAR(255), 
+                role JSON, 
                 address VARCHAR(255),
                 status VARCHAR(255),
                 verification_code VARCHAR(255),   

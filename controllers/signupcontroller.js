@@ -67,7 +67,7 @@ exports.signup_form_post= function(req,res, next){
 
 
 
-    var userData={user_id:uniqueID, email:req.body.email, role:req.body.role, password:hashedPassword, status:"pending"}
+    var userData={user_id:uniqueID, email:req.body.email, role:JSON.stringify({roles:[`${req.body.role}`]}), password:hashedPassword, status:"pending"}
         
         var checkuser =`SELECT * FROM users WHERE email="${req.body.email}";`;
         
@@ -91,7 +91,7 @@ exports.signup_form_post= function(req,res, next){
                                         console.log("New User successfully added!")
                                         console.log(results);
                                         console.log(sendEmail, userData.email);
-                                        sendEmail(userData.email,userData.user_id);
+                                        // sendEmail(userData.email,userData.user_id);
                                         // res.setHeader('x-access-token', 'Bearer '+ token);
                                         console.log(userData.email, + "and "+ userData.verification_code)
                                         return res.status(201).send({message:`Account Created Successfully,check your Email to Verify your Account`})
@@ -107,7 +107,7 @@ exports.signup_form_post= function(req,res, next){
                             console.log("New User successfully added!")
                             console.log(results);
                             console.log(sendEmail, userData.email);
-                            sendEmail(userData.email,userData.user_id);
+                            // sendEmail(userData.email,userData.user_id);
                             // res.setHeader('x-access-token', 'Bearer '+ token);
                             // console.log(userData.email + "and "+ userData.verification_code)
                             return res.status(201).send({message:`Account Created Successfully,check your Email to Verify your Account`})

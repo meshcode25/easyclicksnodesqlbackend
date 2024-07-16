@@ -1,69 +1,60 @@
 
 require("dotenv").config;
-const jwt = require('jsonwebtoken');
-const secret=process.env.SECRET
-const Refreshtoken=("../models/refreshtoken")
+const mysql=require("mysql")
+const dbConnection=require("../databaseSchemas/connectDatabase")
+// var uniqueId = require("../databaseSchemas/uniqueId")
+const { v4: uuidv4 } = require('uuid');
+const jwt=require("jsonwebtoken");
 
 
 module.exports = (req, res, next) =>{
 
+    async function getHeaders(){
+        try{
+            const authHeader=req.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                const token = authHeader.split(' ')[1];
+                req.token = token.accesstoken; // Attach the token to the request object
+                // req.user_id=token.user_id;
+                
+                console.log(token);
 
-    const Verifyuser=jwt.verify(req.headers.Authorization, process.env.SECRET, (err, decoded)=>{
-        if(err){
-            console.log("that shit is expired"); 
-
-        }else{
-            console.log(decoded)
-            console.log("not expired jwt, amazing")
-            console.log(decoded.user._id)
-            return decoded;
-        }
-        
-    });
-    console.log(Verifyuser);
-    // console.log(`Here is the Verification code now callled signin token ${req.params.verificationcode}`)
-    // console.log(`verified user here ${Verifyuser}`);
-
-    // verificationcode:req.params.verificationcode
-    // User.findById(Verifyuser.user._id)
-    // User.findOne({
-    //     _id:mongoose.Types.ObjectId(Verifyuser.user._id)
-    // })
-    if(Verifyuser){
-
-        User.findById(Verifyuser.user._id).exec().then((user)=>{
-            if(!user){
-                console.log("There is not such user found in the database, keep it Status: pending")
-                return res.status(200).send({message: "user was not found the database"})
-            }
-    
-            user.status="active"
-            
-            user.save((err)=>{
-                console.log(user)
-                if(err){
-                    return res.status(500).send({message: err})
-                }else{
-                    console.log("User Email Verification Succcessfully completed, Valid Email")
-                    return res.status(201).send({message:"User Email Successfully Verified, Valid Email"})
+                const decodedToken=jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+                
+                if(decodedToken){
+                    console.log("Valid Token");
+                    next();
                 }
-    
-            })
-    
-        }).catch(err =>{
-    
-            console.log("errors just found, what the fuck, what errors again")
-           return console.error(err)
-    
-    
-        })
-    
+                
+   
+            } else {
+                req.token = null;
+        
+                console.log("There is no accesstoken the token ")
+                console.log(token);
+
+                return res.status(401).send({message:"access Token Expired"})
+
+            }
+        
+        }
+        catch(err){
+              
+            if(jwt.TokenExpiredError || jwt.JsonWebTokenError){
+                 console.log("Access Token Expired on jwt.verify() for authoenfication middleware")
+                return res.status(401).send({message:"access Token Expired"})
+            }                
+            else{
+                console.log("Different unexpected Error encountered")
+                console.log(err);
+                return res.status(401).send({message:"access Token Expired"})
+            }
+            
+        }
+    } 
 
 
+    getHeaders();
 
-    }
-    else{
-        console.log("That shit expired ages ago")
-        next();
-    }
+
 }
