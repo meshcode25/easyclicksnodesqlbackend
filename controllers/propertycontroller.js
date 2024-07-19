@@ -271,7 +271,9 @@ export function createLandlord(req,res,next){
                     var update_roles= current_roles.push("LANDLORD");
                     console.log("updated roles list   "   + update_roles)
                     console.log(update_roles);
-                    const update_user={role:JSON.stringify({roles:update_roles})}
+                    console.log(current_roles);
+
+                    const update_user={role:JSON.stringify({roles:current_roles})}
                     console.log("updated roles list   "   + update_user);
                     console.log(update_user)
 
@@ -362,7 +364,7 @@ export async function createCaretaker(req,res,next){
     const property_id=req.params.propertyid;
     const dbconn=dbConnection()
     const uniqueId=uuidv4()
-    const userData={user_id:uniqueId, first_name:req.body.caretakername, email:req.body.caretakeremail, role:"caretaker", status:"pending", phonenumber:req.body.caretakerphonenumber}
+    const userData={user_id:uniqueId, first_name:req.body.caretakername, email:req.body.caretakeremail, role:JSON.stringify({roles:["CARETAKER"]}), status:"pending", phonenumber:req.body.caretakerphonenumber}
     const checkuser =`SELECT * FROM users WHERE email="${req.body.caretakerdemail}";`;
     const checkProperty=`SELECT * FROM properties WHERE property_id="${property_id}";`;
     
@@ -430,47 +432,136 @@ export async function createCaretaker(req,res,next){
                             })
                         }
                     })
-                }else{
+                }
+                else{
+
+                    var role=JSON.parse(results[0].role);
+                    console.log("here isthe role object" + role);
+                    console.log(role );
+    
+                    const containsrole=role.roles.includes("CARETAKER");
+                    var current_roles=role.roles;
+    
+    
+                    console.log("just set the update user " + current_roles)
+                    console.log("here is the !containsroles " + containsrole)
+                
+
                     const user_id=results[0];              
                     const caretakerData2={caretaker_id:caretaker_id, user_id:user_id, first_name:req.body.caretakername, email:req.body.caretakeremail, phonenumber:req.body.caretakerphonenumber}
                    
 
-                    dbconn.query(`INSERT INTO caretakers SET ? `, caretakerData2, (err,results)=>{
-                        if(err){
-                            console.log(err)
-                        }
-                        else{
-                            console.log("New Caretaker Successfully created Results below ")
-                            console.log(results);
-                    
-                            dbconn.query(checkProperty, (err,results)=>{
-                                if(err){
-                                    console.log(err)
-                                }
-                                else{
-                                    if(results.length>0){
-                                        dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+
+                    if(!containsrole){
+                        var update_roles= current_roles.push("CARETAKER");
+                        console.log("updated roles list   "   + update_roles)
+                        console.log(update_roles);
+                        console.log(current_roles);
+    
+                        const update_user={role:JSON.stringify({roles:current_roles})}
+                        console.log("updated roles list   "   + update_user);
+                        console.log(update_user)
+    
+    
+                            
+                        dbconn.query(`UPDATE users SET ? WHERE user_id="${results[0].user_id}";`, update_user, (err,result)=>{
+                            if(err){
+                                console.log("error updating the user's roles into users table");
+                                console.log(err)
+                            }
+                            else{
+                                console.log("User's role successfully updating the user's roles into users table");
+                                console.log(result)
+                                console.log(result);
+    
+                                console.log("here are the user details from already exists user caretaker");
+                                console.log(results);
+                                console.log(results);
+        
+                                dbconn.query(`INSERT INTO caretakers SET ? `, caretakerData2, (err,results)=>{
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                    else{
+                                        console.log("New Caretaker Successfully created Results below ")
+                                        console.log(results);
+                                
+                                        dbconn.query(checkProperty, (err,results)=>{
                                             if(err){
-                                                console.log("error inserting into properties table");
                                                 console.log(err)
                                             }
                                             else{
-                                                console.log("properties table sucessfully updated with new caretaker");
-                                                console.log(results)            
+                                                if(results.length>0){
+                                                    dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                        if(err){
+                                                            console.log("error inserting into properties table");
+                                                            console.log(err)
+                                                        }
+                                                        else{
+                                                            console.log("properties table sucessfully updated with new caretaker");
+                                                            console.log(results)            
+                                                        }
+                                                    })
+                                                }
+                                                else{
+                                                    console.log("No such propeperty Registered yet!")
+            
+                                                }
+            
                                             }
                                         })
+            
+                                        return res.status(201).send({message:`New Caretaker Created Successfully, Caretaker to Check Email to Verify Account`})         
+                                    }
+                                })
+        
+        
+                            }
+                        })
+
+                    }
+                    else{
+    
+                        dbconn.query(`INSERT INTO caretakers SET ? `, caretakerData2, (err,results)=>{
+                            if(err){
+                                console.log(err)
+                            }
+                            else{
+                                console.log("New Caretaker Successfully created Results below ")
+                                console.log(results);
+                        
+                                dbconn.query(checkProperty, (err,results)=>{
+                                    if(err){
+                                        console.log(err)
                                     }
                                     else{
-                                        console.log("No such propeperty Registered yet!")
-
+                                        if(results.length>0){
+                                            dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                if(err){
+                                                    console.log("error inserting into properties table");
+                                                    console.log(err)
+                                                }
+                                                else{
+                                                    console.log("properties table sucessfully updated with new caretaker");
+                                                    console.log(results)            
+                                                }
+                                            })
+                                        }
+                                        else{
+                                            console.log("No such propeperty Registered yet!")
+    
+                                        }
+    
                                     }
+                                })
+    
+                                return res.status(201).send({message:`New Caretaker Created Successfully, Caretaker to Check Email to Verify Account`})         
+                            }
+                        })
 
-                                }
-                            })
 
-                            return res.status(201).send({message:`New Caretaker Created Successfully, Caretaker to Check Email to Verify Account`})         
-                        }
-                    })
+                    }
+
                 }
             }
         })
