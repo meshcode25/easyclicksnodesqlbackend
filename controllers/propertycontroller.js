@@ -4,6 +4,7 @@ import dbConnection from "../databaseSchemas/connectDatabase";
 import { v4 as uuidv4 } from 'uuid';
 import { verify } from "jsonwebtoken";
 import cookieParser from "cookie-parser";
+import { check } from "express-validator";
 
 // console.log(dbconn);;
 
@@ -131,6 +132,9 @@ export function createLandlord(req,res,next){
     const checkuser =`SELECT * FROM users WHERE email="${req.body.landlordemail}";`;
 
     const checkProperty=`SELECT * FROM properties WHERE property_id="${property_id}";`;
+
+    const checkLandlordPerProperty = `SELECT * FROM properties WHERE landlord_id IS NOT NULL AND landlord_id != '';`;
+
     
 
     console.log(req.body.landlordphonenumber);
@@ -161,46 +165,121 @@ export function createLandlord(req,res,next){
                                     
                                 }
                                 else{
-                                    
-                                    dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+
+
+                                    dbconn.query(checkLandlordPerProperty, (err,checklandlordperpropertyresults)=>{
                                         if(err){
                                             console.log(err)
                                         }
                                         else{
-                                            console.log("New Landlord Successfully created Results below ")
-                                            console.log(results);
-                                    
-                                            dbconn.query(checkProperty, (err,results)=>{
-                                                if(err){
-                                                    console.log(err)
-                                                }
-                                                else{
-                                                    if(results.length>0){
-                                                        dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                            if(checklandlordperpropertyresults.length<1){
+                                                
+                                                dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                                                    if(err){
+                                                        console.log(err)
+                                                    }
+                                                    else{
+                                                        console.log("New Landlord Successfully created Results below ")
+                                                        console.log(results);
+                                                
+                                                        dbconn.query(checkProperty, (err,results)=>{
                                                             if(err){
-                                                                console.log("error inserting into properties table");
                                                                 console.log(err)
                                                             }
                                                             else{
-                                                                console.log("properties table sucessfully updated");
-                                                                console.log(results)            
+                                                                if(results.length>0){
+                                                                    dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                                        if(err){
+                                                                            console.log("error inserting into properties table");
+                                                                            console.log(err)
+                                                                        }
+                                                                        else{
+                                                                            console.log("properties table sucessfully updated");
+                                                                            console.log(results)            
+                                                                        }
+                                                                    })
+                                                                }
+                                                                else{
+                                                                    console.log("No such propeperty Registered yet!")
+                    
+                                                                }
+                    
                                                             }
                                                         })
+            
+                                                        return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+            
+            
+                                                      
+                                                    }
+                                                })
+                                            }
+                                            else{
+                                                const deletepresentlandlord=`DELETE FROM landlords WHERE landlord_id="${checklandlordperpropertyresults[0].landlord_id}";`
+                                                
+                                                dbconn.query(deletepresentlandlord, (err,results)=>{
+                                                    if(err){
+                                                        console.log(err)
                                                     }
                                                     else{
-                                                        console.log("No such propeperty Registered yet!")
-        
+                                                        console.log("existing landlord deleted");
+                                                        console.log(results);
+
+
+                                                        dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                                                            if(err){
+                                                                console.log(err)
+                                                            }
+                                                            else{
+                                                                console.log("New Landlord Successfully created Results below ")
+                                                                console.log(results);
+                                                        
+                                                                dbconn.query(checkProperty, (err,results)=>{
+                                                                    if(err){
+                                                                        console.log(err)
+                                                                    }
+                                                                    else{
+                                                                        if(results.length>0){
+                                                                            dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                                                if(err){
+                                                                                    console.log("error inserting into properties table");
+                                                                                    console.log(err)
+                                                                                }
+                                                                                else{
+                                                                                    console.log("properties table sucessfully updated");
+                                                                                    console.log(results)            
+                                                                                }
+                                                                            })
+                                                                        }
+                                                                        else{
+                                                                            console.log("No such propeperty Registered yet!")
+                            
+                                                                        }
+                            
+                                                                    }
+                                                                })
+                    
+                                                                return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                    
+                    
+                                                              
+                                                            }
+                                                        })
+
+
+
+
+
+
+
                                                     }
-        
-                                                }
-                                            })
+                                                })
+                                            }
 
-                                            return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
-
-
-                                          
                                         }
                                     })
+                                    
+                               
 
                 
             
@@ -221,38 +300,88 @@ export function createLandlord(req,res,next){
 
 
 
-                        dbconn.query(`INSERT INTO landlords SET ? `, landlordData2, (err,results)=>{
+
+
+                        dbconn.query(checkLandlordPerProperty, (err,checklandlordperpropertyresults)=>{
                             if(err){
                                 console.log(err)
                             }
                             else{
-                                console.log("New Landlord Successfully created Results below ")
-                                console.log(results);
-                                
-                                dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData2, (err,results)=>{
-                                    if(err){
-                                        console.log("error inserting into properties table");
-                                        console.log(err)
-                                    }
-                                    else{
-                                        console.log("properties table sucessfully updated");
-                                        console.log(results)            
-                                    }
-                                })
+                                if(checklandlordperpropertyresults.length<1){
+                                    dbconn.query(`INSERT INTO landlords SET ? `, landlordData2, (err,results)=>{
+                                        if(err){
+                                            console.log(err)
+                                        }
+                                        else{
+                                            console.log("New Landlord Successfully created Results below ")
+                                            console.log(results);
+                                            
+                                            dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData2, (err,results)=>{
+                                                if(err){
+                                                    console.log("error inserting into properties table");
+                                                    console.log(err)
+                                                }
+                                                else{
+                                                    console.log("properties table sucessfully updated");
+                                                    console.log(results)            
+                                                }
+                                            })
+            
+                                            return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                               
+                                        }
+                                    }) 
+                                }
+                                else{
 
-                                return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                                    const deletepresentlandlord=`DELETE FROM landlords WHERE landlord_id="${checklandlordperpropertyresults[0].landlord_id}";`
+                                                
+                                    dbconn.query(deletepresentlandlord, (err,results)=>{
+                                        if(err){
+                                            console.log(err)
+                                        }
+                                        else{
+                                            console.log("existing landlord deleted");
+                                            console.log(results);
 
 
-                           
+                                            dbconn.query(`INSERT INTO landlords SET ? `, landlordData2, (err,results)=>{
+                                                if(err){
+                                                    console.log(err)
+                                                }
+                                                else{
+                                                    console.log("New Landlord Successfully created Results below ")
+                                                    console.log(results);
+                                                    
+                                                    dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData2, (err,results)=>{
+                                                        if(err){
+                                                            console.log("error inserting into properties table");
+                                                            console.log(err)
+                                                        }
+                                                        else{
+                                                            console.log("properties table sucessfully updated");
+                                                            console.log(results)            
+                                                        }
+                                                    })
+                    
+                                                    return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                          
+                                                }
+                                            }) 
+                                        }
+                                    })   
+                                }
+
                             }
-                        })    
+                        })                   
 
                     }
                 })
             }
             else{
+             
                 var role=JSON.parse(results[0].role);
-                console.log("here isthe role object" + role);
+                console.log("here is the role object" + role);
                 console.log(role );
 
                 const containsrole=role.roles.includes("LANDLORD");
@@ -295,60 +424,167 @@ export function createLandlord(req,res,next){
             
                             // console.log(userDaa.phonenumber)
             
-                            dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+
+
+                            dbconn.query(checkLandlordPerProperty, (err,checklandlordperpropertyresults)=>{
                                 if(err){
                                     console.log(err)
                                 }
                                 else{
-                                    console.log("New Landlord Successfully created Results below ")
-                                    console.log(results);
-                                    
-            
-                                    dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
-                                        if(err){
-                                            console.log("error inserting into properties table");
-                                            console.log(err)
-                                        }
-                                        else{
-                                            console.log("properties table sucessfully updated");
-                                            console.log(results)            
-                                        }
-                                    })
-            
-                                    return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
-            
-            
+                                    if(checklandlordperpropertyresults.length<1){
+                                        dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            else{
+                                                console.log("New Landlord Successfully created Results below ")
+                                                console.log(results);
+                                                
+                        
+                                                dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                    if(err){
+                                                        console.log("error inserting into properties table");
+                                                        console.log(err)
+                                                    }
+                                                    else{
+                                                        console.log("properties table sucessfully updated");
+                                                        console.log(results)            
+                                                    }
+                                                })
+                        
+                                                return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                        
+                        
+                                            }
+                                        })     
+                                        
+                                    }
+                                    else{
+                                        const deletepresentlandlord=`DELETE FROM landlords WHERE landlord_id="${checklandlordperpropertyresults[0].landlord_id}";`
+                                                
+                                        dbconn.query(deletepresentlandlord, (err,results)=>{
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            else{
+                                                console.log("existing landlord deleted");
+                                                console.log(results);
+
+
+
+                                                dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                                                    if(err){
+                                                        console.log(err)
+                                                    }
+                                                    else{
+                                                        console.log("New Landlord Successfully created Results below ")
+                                                        console.log(results);
+                                                        
+                                
+                                                        dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                            if(err){
+                                                                console.log("error inserting into properties table");
+                                                                console.log(err)
+                                                            }
+                                                            else{
+                                                                console.log("properties table sucessfully updated");
+                                                                console.log(results)            
+                                                            }
+                                                        })
+                                
+                                                        return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                                
+                                
+                                                    }
+                                                })     
+                                            }
+                                        })
+                                    }
                                 }
-                            })            
+                            })
+
                         }
                     })
 
                 }
                 else{
-                    dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                 
+                    dbconn.query(checkLandlordPerProperty, (err,checklandlordperpropertyresults)=>{
                         if(err){
                             console.log(err)
                         }
                         else{
-                            console.log("New Landlord Successfully created Results below ")
-                            console.log(results);
-                            
-    
-                            dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
-                                if(err){
-                                    console.log("error inserting into properties table");
-                                    console.log(err)
-                                }
-                                else{
-                                    console.log("properties table sucessfully updated");
-                                    console.log(results)            
-                                }
-                            })
-    
-                            return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
-    
+                            if(checklandlordperpropertyresults.length<1){
+                                dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                    else{
+                                        console.log("New Landlord Successfully created Results below ")
+                                        console.log(results);
+                                        
+                
+                                        dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                            if(err){
+                                                console.log("error inserting into properties table");
+                                                console.log(err)
+                                            }
+                                            else{
+                                                console.log("properties table sucessfully updated");
+                                                console.log(results)            
+                                            }
+                                        })
+                
+                                        return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                
+                
+                                    }
+                                })     
+                                
+                            }
+                            else{
+                                const deletepresentlandlord=`DELETE FROM landlords WHERE landlord_id="${checklandlordperpropertyresults[0].landlord_id}";`
+                                        
+                                dbconn.query(deletepresentlandlord, (err,results)=>{
+                                    if(err){
+                                        console.log(err)
+                                    }
+                                    else{
+                                        console.log("existing landlord deleted");
+                                        console.log(results);
+
+
+
+                                        dbconn.query(`INSERT INTO landlords SET ? `, landlordData, (err,results)=>{
+                                            if(err){
+                                                console.log(err)
+                                            }
+                                            else{
+                                                console.log("New Landlord Successfully created Results below ")
+                                                console.log(results);
+                                                
+                        
+                                                dbconn.query(`UPDATE properties SET ? WHERE property_id="${property_id}";`, propertyData, (err,results)=>{
+                                                    if(err){
+                                                        console.log("error inserting into properties table");
+                                                        console.log(err)
+                                                    }
+                                                    else{
+                                                        console.log("properties table sucessfully updated");
+                                                        console.log(results)            
+                                                    }
+                                                })
+                        
+                                                return res.status(201).send({message:`New Landlord Created Successfully, Check Email to Verify Account`})
+                        
+                        
+                                            }
+                                        })     
+                                    }
+                                })
+                            }
                         }
-                    })            
+                    })
                 }  
 
             }
