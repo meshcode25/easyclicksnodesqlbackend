@@ -1,7 +1,9 @@
-/nodemodules
+node_modules/
 .env
 Babel.babelrc
 ProcFile
 
 
 
+
+/node_modules

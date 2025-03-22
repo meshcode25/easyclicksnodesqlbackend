@@ -1,4 +1,4 @@
-import mysql from "mysql";
+import mysql from "mysql2";
 import dbConnection from "../databaseSchemas/connectDatabase";
 // var uniqueId = require("../databaseSchemas/uniqueId")
 import { v4 as uuidv4 } from 'uuid';
@@ -805,4 +805,59 @@ export async function createCaretaker(req,res,next){
     catch(err){
         console.log(err);
     }
+}
+
+
+export async function listpropertyfeatures(req,res,next){
+    
+    console.log("About to start Listing the Properties Features");
+
+    console.log("Here below are the property Features");
+
+    console.log(req.body);
+    console.log(req.params);
+  
+    // res.status(201).send({message:"Finally GOT TO BACKEND WITH THE MESSAGE TO POST, NOW HERE IS THE ANSWER FROM BEHIND THE BACKEND"});
+
+    
+    const propertyId=req.params.propertyid;
+    
+    var dbconn=dbConnection()
+
+
+    const internalfeatures=JSON.stringify(req.body.propertyinternalfeatures);
+
+    const externalfeatures=JSON.stringify(req.body.propertyexternalfeatures);
+
+
+    const nearbyfeatures=JSON.stringify(req.body.propertynearbyfeatures );
+
+
+    const roomsperunit=JSON.stringify(req.body.propertyroomsperunit );
+
+
+    const pricesperunit=JSON.stringify( req.body.propertypriceperunit  );
+
+
+    var propertydetails={property_type:req.body.propertytype, listing_purpose:req.body.propertylistingpurpose,internal_features_per_unit:internalfeatures,
+        apartment_external_features:externalfeatures,apartment_features_nearby:nearbyfeatures,apartment_rooms_per_unit:roomsperunit,prices_per_unit:pricesperunit
+    }
+
+
+
+    dbconn.query(`UPDATE properties SET ? WHERE property_id="${propertyId}"`, propertydetails, (err,results)=>{
+        if(err){
+            console.log("Error inserting Property Features to Table properties  ", err)
+        }
+        else{
+            console.log(results)
+            console.log("Successfully Inserted property features to properties TABLE CONGRATS")
+
+            res.status(201).send({message:"Successfully Inserted property features to properties TABLE CONGRATS"});
+
+        }
+    })
+
+
+
 }

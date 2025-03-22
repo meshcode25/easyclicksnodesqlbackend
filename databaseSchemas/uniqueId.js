@@ -11,7 +11,7 @@ function generateUniqueId(){
 
         for(let i=0;i<stringlength;i++){
             var randommathvalue=Math.floor(Math.random()*36);
-            console.log(randommathvalue);
+            // console.log(randommathvalue);
             uniqueid +=uniquestring[randommathvalue];
         }
 

@@ -501,7 +501,7 @@ function populatedb (){
 
     console.log(uniqueid())
 
-    var mysql = require('mysql');
+    var mysql = require('mysql2');
   
     // var mysql = require('mysql');
     
@@ -570,10 +570,11 @@ function populatedb (){
     
     
             var createtanantstable=`CREATE TABLE IF NOT EXISTS tenants(
-                tenant_id VARCHAR(255) PRIMARY KEY, 
+                tenant_id INT PRIMARY KEY, 
                 first_name VARCHAR(255), 
                 last_name VARCHAR(255), 
-                email VARCHAR(255), 
+                email VARCHAR(255),
+                id_number INT, 
                 phonenumber INT(255), 
                 address VARCHAR(255),
                 user_id VARCHAR(255),
@@ -602,6 +603,33 @@ function populatedb (){
                 FOREIGN KEY(property_id) REFERENCES properties(property_id) ON UPDATE CASCADE ON DELETE CASCADE
             )`;
     
+            var createunitstable=`CREATE TABLE IF NOT EXISTS units(
+                unit_id INT AUTO_INCREMENT PRIMARY KEY,
+                unit_type VARCHAR(255),
+                unit_price INT(255),
+                unit_number VARCHAR(255),
+                
+                property_id VARCHAR(255),
+                tenant_id INT(255),
+
+                FOREIGN KEY(tenant_id) REFERENCES tenants(tenant_id) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY(property_id) REFERENCES properties(property_id) ON UPDATE CASCADE ON DELETE CASCADE
+            )`
+
+
+            var createunitsimagestable=`CREATE TABLE IF NOT EXISTS unitsimages(
+                image_id VARCHAR(255) PRIMARY KEY, 
+                property_id VARCHAR(255), 
+                image_view VARCHAR(255), 
+                image_status VARCHAR(255), 
+                image_path VARCHAR(255),
+                unit_id INT,
+
+                FOREIGN KEY(unit_id) REFERENCES units(unit_id) ON UPDATE CASCADE ON DELETE CASCADE,
+                FOREIGN KEY(property_id) REFERENCES properties(property_id) ON UPDATE CASCADE ON DELETE CASCADE
+            )`;
+
+
             var createpropertiestable=`CREATE TABLE IF NOT EXISTS properties(
                 property_id VARCHAR(255) PRIMARY KEY,
                 user_id VARCHAR(255), 
@@ -611,10 +639,10 @@ function populatedb (){
                 property_type VARCHAR(255),
                 listing_purpose VARCHAR(255), 
                 internal_features_per_unit JSON,
-                apartment_features JSON,
+                apartment_external_features JSON,
                 apartment_features_nearby JSON,
                 apartment_rooms_per_unit JSON,
-                price VARCHAR(255),
+                prices_per_unit JSON,
                 
                 landlord_id VARCHAR(255),
                 caretaker_id VARCHAR(255),
@@ -626,6 +654,7 @@ function populatedb (){
                 FOREIGN KEY(service_provider_id) REFERENCES serviceproviders(service_provider_id) ON UPDATE CASCADE ON DELETE CASCADE
     
             )`;
+                
             
             var createaccesstokenstable=`CREATE TABLE IF NOT EXISTS accesstokens(
                 accesstoken_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -773,6 +802,32 @@ function populatedb (){
             });
           
 
+            con.query(createunitstable,function(error,results){
+                if (error){
+                    console.log(error);
+                    // throw err;
+
+                }
+                else{
+                    console.log("Refesh Tokens table successfully created");
+                    console.log(results);   
+                }
+            }) 
+            
+
+
+            con.query(createunitsimagestable,function(error,results){
+                if (error){
+                    console.log(error);
+                    // throw err;
+
+                }
+                else{
+                    console.log("Refesh Tokens table successfully created");
+                    console.log(results);   
+                }
+            })
+           
        
            
         }

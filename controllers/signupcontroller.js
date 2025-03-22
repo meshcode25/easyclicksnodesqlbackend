@@ -14,7 +14,7 @@ const jwt=require("jsonwebtoken");
 const secret=process.env.SECRET
 const sendEmail=require("../Oauth2")
 // console.log(`Is this the undefinedd?? ${secret}`);
-const mysql=require("mysql")
+const mysql=require("mysql2")
 const dbConnection=require("../databaseSchemas/connectDatabase")
 var uniqueId = require("../databaseSchemas/uniqueId")
 

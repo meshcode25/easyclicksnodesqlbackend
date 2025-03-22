@@ -19,6 +19,8 @@ router.post("/list-property/createproperty", propertyController.createProperty);
 
 router.post("/list-property/caretakerstep/:propertyid", propertyController.createCaretaker);
 
+router.post("/list-property/propertyfeatures/:propertyid",propertyController.listpropertyfeatures);
+
 
 
 // , propertyController.create_apartement_post)

@@ -1,5 +1,5 @@
 
-var mysql = require('mysql');
+var mysql = require('mysql2');
   
 
 function connectDatabase(){

@@ -1,6 +1,6 @@
 // env.config()
 const jwt= require("jsonwebtoken")
-const mysql=require("mysql")
+const mysql=require("mysql2")
 const dbConnection=require("../databaseSchemas/connectDatabase")
 var uniqueId = require("../databaseSchemas/uniqueId")
 const { v4: uuidv4 } = require('uuid');
